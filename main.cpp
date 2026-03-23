@@ -13,6 +13,9 @@
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
+const int WIDTH = 1600;
+const int HEIGHT = 1200;
+
 const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
@@ -104,7 +107,7 @@ private:
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        window = glfwCreateWindow(800, 600, "Vulkan", nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
     }
 
     void initVulkan() {
@@ -892,7 +895,7 @@ private:
         }
         else {
             // If the window manager allows us to pick, we clamp our desired resolution (800x600) to the allowed min/max
-            VkExtent2D actualExtent = { 800, 600 };
+            VkExtent2D actualExtent = { WIDTH, HEIGHT };
 
             actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
             actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);

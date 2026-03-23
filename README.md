@@ -15,5 +15,4 @@ but still wanted to keep this starting point as I continue learning Vulkan.
 3. Open the folder in Visual Studio, point the CMake toolchain to your vcpkg installation, and build.
 
 ## Author
-Adil Mert Ergörün (CTRL-C CTRL-V mostly)
-Gemini 3.1 Pro
+Adil Mert ErgÃ¶rÃ¼n

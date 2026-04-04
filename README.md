@@ -3,11 +3,13 @@
 A minimal, explicit Vulkan rendering pipeline built from scratch in C++. 
 This repository serves as a boilerplate for future low-level systems and graphics programming projects.
 
-To be fair with you all, I have no idea what is going on. I probably understand 5% of the code,
-but still wanted to keep this starting point as I continue learning Vulkan.
+At first I vibecoded it, it worked but I didn't get much value out of it. Then I follow this tutorial:
+https://vulkan-tutorial.com/Introduction
+
+now instead of %5, I understand around %50 of the code, maybe more. Great Success!
 
 ## Current Capabilities
-- I have no idea it just draws a shiny triangle without any errors. Currently its more than enough.
+- Sets up all the necessary vulkan stuff to draw a triangle. (Have to edit to include stuff in detail, but later...)
 
 ## How to Build (Windows)
 1. Ensure Visual Studio 2022 (with C++ CMake tools) and the LunarG Vulkan SDK are installed.

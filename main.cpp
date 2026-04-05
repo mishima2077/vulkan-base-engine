@@ -14,12 +14,11 @@
 #include <algorithm> 
 #include <fstream>
 
-const uint32_t WIDTH = 1600;
-const uint32_t HEIGHT = 1200;
+const uint32_t WIDTH = 800;
+const uint32_t HEIGHT = 600;
 
-// FIND A FIX
-const char* vertShaderLoc = "../../../shaders/vert.spv";
-const char* fragShaderLoc = "../../../shaders/frag.spv";
+const char* vertShaderLoc = "shaders/vert.spv";
+const char* fragShaderLoc = "shaders/frag.spv";
 
 // Standart validation layers provided by VulkanSDK
 const std::vector<const char*> validationLayers = {
@@ -28,7 +27,10 @@ const std::vector<const char*> validationLayers = {
 
 // Required extensions
 const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef __APPLE__
+    "VK_KHR_portability_subset",
+#endif
 };
 
 // Helper to read SPIR-V binaries
@@ -180,6 +182,12 @@ private:
 
         // Polling the extensions using glfw function
         auto extensions = getRequiredExtensions();
+
+#ifdef __APPLE__
+        // MoltenVK portability enumeration
+        extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
         // Manuel extension check
         uint32_t extensionCount = 0;
@@ -782,9 +790,8 @@ private:
             swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
         }
 
-        // Selects a discrete gpu, remove second line if only integrated gpu exists
-        return indices.is_complete() && extensionsSupported && swapChainAdequate && 
-                 deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
+        // Select a suitable GPU
+        return indices.is_complete() && extensionsSupported && swapChainAdequate;
     }
 
     bool checkDeviceExtensionSupport(VkPhysicalDevice device) {

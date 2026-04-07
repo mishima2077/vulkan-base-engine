@@ -17,6 +17,10 @@ find_package(glm REQUIRED)
 # Create the executable
 add_executable(VulkanTest main.cpp)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(VulkanTest PRIVATE RELEASE)
+endif()
+
 # Link the libraries to our executable
 target_link_libraries(VulkanTest PRIVATE 
     Vulkan::Vulkan 

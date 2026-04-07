@@ -51,7 +51,7 @@ static std::vector<char> readFile(const std::string& filename) {
     return buffer;
 }
 
-#ifdef NDEBUG
+#if defined(NDEBUG) || defined(RELEASE)
 const bool enableValidationLayers = false;
 #else
 const bool enableValidationLayers = true;
@@ -165,7 +165,7 @@ private:
 
     void createInstance() {
         if (enableValidationLayers && !checValidationLayerSupport()) {
-            throw std::runtime_error("Validation layers requested, but now available!");
+            throw std::runtime_error("Validation layers requested, but not available!");
         }
 
         VkApplicationInfo appInfo{};

@@ -51,8 +51,5 @@ CMakeSettings.json
 vcpkg_installed/
 .vcpkg-root
 
-# Build/Run script
-run.sh
-
 # Compiled Shaders
 *.spv

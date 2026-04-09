@@ -14,7 +14,9 @@
 #include <algorithm> 
 #include <fstream>
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
+// Making this 2 creates a lot of validation layer errors
+// look into it!
+const int MAX_FRAMES_IN_FLIGHT = 3;
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -204,6 +206,8 @@ private:
 #ifdef __APPLE__
         // MoltenVK portability enumeration
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+        // Required by VK_KHR_portability_subset device extension
+        extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
         createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
@@ -346,9 +350,16 @@ private:
     }
 
     void recreateSwapChain() {
-        cleanupSwapChain();
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(window, &width, &height);
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(window, &width, &height);
+            glfwWaitEvents();
+        }
 
         vkDeviceWaitIdle(device);
+
+        cleanupSwapChain();
 
         createSwapChain();
         createImageViews();

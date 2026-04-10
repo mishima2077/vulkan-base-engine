@@ -46,6 +46,7 @@ compile_commands.json
 CMakeSettings.json
 
 .vscode
+.cache
 
 # vcpkg
 vcpkg_installed/

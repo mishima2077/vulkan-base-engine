@@ -28,9 +28,51 @@ target_link_libraries(VulkanTest PRIVATE
     glm::glm
 )
 
-# Copy shaders directory next to the executable
+# -----------------------------------------------------------------------------
+# Shader compilation setup
+# -----------------------------------------------------------------------------
+
+find_program(GLSLC_EXECUTABLE NAMES glslc HINTS "$ENV{VULKAN_SDK}/Bin" "$ENV{VULKAN_SDK}/bin")
+if(NOT GLSLC_EXECUTABLE)
+    message(FATAL_ERROR "glslc not found! Please install Vulkan SDK or add glslc to PATH.")
+endif()
+
+file(GLOB SHADER_SOURCES "${CMAKE_SOURCE_DIR}/shaders/*.vert" "${CMAKE_SOURCE_DIR}/shaders/*.frag")
+
+set(COMPILED_SHADERS "")
+foreach(SHADER ${SHADER_SOURCES})
+    get_filename_component(FILE_NAME ${SHADER} NAME_WE) # name without extension
+    get_filename_component(FILE_EXT ${SHADER} EXT)      # extension, e.g. ".vert"
+
+    # Map extension to spv filename
+    if(FILE_EXT STREQUAL ".vert")
+        set(SPV_NAME "vert.spv")
+    elseif(FILE_EXT STREQUAL ".frag")
+        set(SPV_NAME "frag.spv")
+    else()
+        message(FATAL_ERROR "Unknown shader extension: ${FILE_EXT}")
+    endif()
+
+    set(SPV_FILE "${CMAKE_BINARY_DIR}/shaders/${SPV_NAME}")
+
+    add_custom_command(
+        OUTPUT ${SPV_FILE}
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/shaders"
+        COMMAND ${GLSLC_EXECUTABLE} ${SHADER} -o ${SPV_FILE}
+        DEPENDS ${SHADER}
+        COMMENT "Compiling shader ${FILE_NAME}${FILE_EXT} -> ${SPV_NAME}"
+        VERBATIM
+    )
+
+    list(APPEND COMPILED_SHADERS ${SPV_FILE})
+endforeach()
+
+add_custom_target(Shaders ALL DEPENDS ${COMPILED_SHADERS})
+add_dependencies(VulkanTest Shaders)
+
 add_custom_command(TARGET VulkanTest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:VulkanTest>/shaders"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${CMAKE_SOURCE_DIR}/shaders"
-    "$<TARGET_FILE_DIR:VulkanTest>/shaders"
+            "${CMAKE_BINARY_DIR}/shaders"
+            "$<TARGET_FILE_DIR:VulkanTest>/shaders"
 )

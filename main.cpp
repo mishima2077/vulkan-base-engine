@@ -21,8 +21,8 @@
 // look into it!
 const int MAX_FRAMES_IN_FLIGHT = 3;
 
-const uint32_t WIDTH = 1600;
-const uint32_t HEIGHT = 1200;
+const uint32_t WIDTH = 1000;
+const uint32_t HEIGHT = 800;
 
 const char* vertShaderLoc = "shaders/vert.spv";
 const char* fragShaderLoc = "shaders/frag.spv";

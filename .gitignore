@@ -54,3 +54,6 @@ vcpkg_installed/
 
 # Compiled Shaders
 *.spv
+
+# Mac
+.DS_Store

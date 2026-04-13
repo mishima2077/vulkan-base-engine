@@ -21,8 +21,8 @@
 // look into it!
 const int MAX_FRAMES_IN_FLIGHT = 3;
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+const uint32_t WIDTH = 1600;
+const uint32_t HEIGHT = 1200;
 
 const char* vertShaderLoc = "shaders/vert.spv";
 const char* fragShaderLoc = "shaders/frag.spv";
@@ -135,9 +135,9 @@ struct Vertex {
 };
 
 const std::vector<Vertex> vertices = {
-    {{0.0f, -0.8f}, {1.0f, 1.0f, 1.0f}},
-    {{0.8f, 0.8f},  {0.0f, 1.0f, 0.0f}},
-    {{-0.8f, 0.8f}, {0.0f, 0.0f, 1.0f}}
+    {{ 0.0f, -0.8f}, {1.0f, 1.0f, 1.0f}},
+    {{ 0.8f,  0.8f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.8f,  0.8f}, {0.0f, 1.0f, 1.0f}}
 };
 
 class HelloTriangleApplication {
@@ -622,8 +622,7 @@ private:
         auto bindingDescription = Vertex::getBindingDescription();
         auto attributeDescriptions = Vertex::getAttributeDescription();
 
-        // No Vertex Buffer for now, I will come back to this
-        // I came back to it lol
+        // Vertex Buffers
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexBindingDescriptionCount = 1;
@@ -921,7 +920,7 @@ private:
         renderPassInfo.renderArea.extent = swapChainExtent;
 
         // Why is it initialized this way?
-        VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+        VkClearValue clearColor = { {{0.3f, 0.3f, 0.7f, 1.0f}} };
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 

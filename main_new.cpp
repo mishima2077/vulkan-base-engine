@@ -12,11 +12,9 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-class HelloTriangleApplication
-{
+class HelloTriangleApplication {
 public:
-	void run()
-	{
+	void run() {
 		initWindow();
 		initVulkan();
 		mainLoop();
@@ -24,10 +22,12 @@ public:
 	}
 
 private:
+	vk::raii::Context	context;
+	vk::raii::Instance	instance = nullptr;
+
 	GLFWwindow* window = nullptr;
 
-	void initWindow()
-	{
+	void initWindow() {
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -36,35 +36,65 @@ private:
 		window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 	}
 
-	void initVulkan()
-	{
+	void initVulkan() {
+		createInstance();
 	}
 
-	void mainLoop()
-	{
+	void createInstance() {
+		constexpr vk::ApplicationInfo appInfo{
+			.pApplicationName	= "Hello Triangle",
+			.applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+			.pEngineName		= "No Engine",
+			.apiVersion			= vk::ApiVersion14
+		};
+
+		uint32_t glfwExtensionsCount = 0;
+		auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
+
+		auto extensionProperties = context.enumerateInstanceExtensionProperties();
+		for (uint32_t i = 0; i < glfwExtensionsCount; ++i) {
+			bool found = false;
+			for (auto extension : extensionProperties) {
+				if (strcmp(extension.extensionName, glfwExtensions[i]) == 0) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found == false) {
+				throw std::runtime_error("Required glfw extension not supported: " + std::string(glfwExtensions[i]));
+			}
+		}
+
+		vk::InstanceCreateInfo createInfo{
+			.pApplicationInfo = &appInfo,
+			.enabledExtensionCount = glfwExtensionsCount,
+			.ppEnabledExtensionNames = glfwExtensions
+		};
+
+		instance = vk::raii::Instance(context, createInfo);
+	}
+
+	void mainLoop() {
 		while (!glfwWindowShouldClose(window))
 		{
 			glfwPollEvents();
 		}
 	}
 
-	void cleanup()
-	{
+	void cleanup() {
 		glfwDestroyWindow(window);
 
 		glfwTerminate();
 	}
 };
 
-int main()
-{
-	try
-	{
+int main() {
+	try {
 		HelloTriangleApplication app;
 		app.run();
 	}
-	catch (const std::exception& e)
-	{
+	catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(VulkanTest)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # On Apple Silicon, help CMake find Homebrew packages
@@ -23,6 +23,20 @@ endif()
 
 # Link the libraries to our executable
 target_link_libraries(VulkanTest PRIVATE 
+    Vulkan::Vulkan 
+    glfw 
+    glm::glm
+)
+
+# Create the executable
+add_executable(VulkanTestNew main_new.cpp)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(VulkanTestNew PRIVATE RELEASE)
+endif()
+
+# Link the libraries to our executable
+target_link_libraries(VulkanTestNew PRIVATE 
     Vulkan::Vulkan 
     glfw 
     glm::glm
@@ -68,9 +82,19 @@ foreach(SHADER ${SHADER_SOURCES})
 endforeach()
 
 add_custom_target(Shaders ALL DEPENDS ${COMPILED_SHADERS})
+
 add_dependencies(VulkanTest Shaders)
 
 add_custom_command(TARGET VulkanTest POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:VulkanTest>/shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_BINARY_DIR}/shaders"
+            "$<TARGET_FILE_DIR:VulkanTest>/shaders"
+)
+
+add_dependencies(VulkanTestNew Shaders)
+
+add_custom_command(TARGET VulkanTestNew POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:VulkanTest>/shaders"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_BINARY_DIR}/shaders"

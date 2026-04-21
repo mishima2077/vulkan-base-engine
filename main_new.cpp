@@ -17,6 +17,13 @@ const std::vector<char const*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
+const std::vector<const char*> deviceExtensions = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef __APPLE__
+    "VK_KHR_portability_subset",
+#endif
+};
+
 #ifdef NDEBUG
 constexpr bool enableValidationLayers = false;
 #else
@@ -102,6 +109,9 @@ private:
 		}
 
 		vk::InstanceCreateInfo createInfo{
+#ifdef __APPLE__
+			.flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR,
+#endif
 			.pApplicationInfo = &appInfo,
 			.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size()),
 			.ppEnabledLayerNames = requiredLayers.data(),
@@ -131,6 +141,11 @@ private:
 		if (enableValidationLayers) {
 			extensions.push_back(vk::EXTDebugUtilsExtensionName);
 		}
+
+#ifdef __APPLE__
+		extensions.push_back(vk::KHRPortabilityEnumerationExtensionName);
+		extensions.push_back(vk::KHRGetPhysicalDeviceProperties2ExtensionName);
+#endif
 
 		return extensions;
 	}

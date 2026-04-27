@@ -17,13 +17,6 @@ const std::vector<char const*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 };
 
-const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-#ifdef __APPLE__
-    "VK_KHR_portability_subset",
-#endif
-};
-
 #ifdef NDEBUG
 constexpr bool enableValidationLayers = false;
 #else
@@ -42,10 +35,16 @@ public:
 private:
 	vk::raii::Context	context;
 	vk::raii::Instance	instance = nullptr;
+	vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
 
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
 
-	vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+	std::vector<const char*> requiredDeviceExtensions = { 
+		vk::KHRSwapchainExtensionName,
+#ifdef __APPLE__
+		"VK_KHR_portability_subset",
+#endif
+	};
 
 	GLFWwindow* window = nullptr;
 
@@ -125,11 +124,16 @@ private:
 	void pickPhysicalDevice() {
 		auto physicalDevices = instance.enumeratePhysicalDevices();
 
-		if (physicalDevices.empty()) {
-			throw std::runtime_error("failed to find GPUs with Vulkan support!");
-		}
+		auto const devIter = std::ranges::find_if(physicalDevices,
+			[&](const auto& physicalDevice) {
+				return isDeviceSuitable(physicalDevice);
+			});
 
+		if (devIter == physicalDevices.end()) {
+			throw std::runtime_error("failed to find a suitable GPU");
+		}
 		
+		physicalDevice = *devIter;
 	}
 
 	std::vector<const char*> getRequiredInstanceExtensions() {
@@ -157,11 +161,9 @@ private:
 		bool supportsGraphics =
 			std::ranges::any_of(queueFamilies, [](auto const& qfp) { return !!(qfp.queueFlags & vk::QueueFlagBits::eGraphics); });
 
-		std::vector<const char*> requiredDeviceExtension = { vk::KHRSwapchainExtensionName };
-
 		auto availableDeviceExtensions = physicalDevice.enumerateDeviceExtensionProperties();
 		bool supportsAllRequiredExtensions =
-			std::ranges::all_of(requiredDeviceExtension,
+			std::ranges::all_of(requiredDeviceExtensions,
 				[&availableDeviceExtensions](auto const& requiredDeviceExtension)
 				{
 					return std::ranges::any_of(availableDeviceExtensions,
@@ -169,7 +171,11 @@ private:
 						{ return strcmp(availableDeviceExtension.extensionName, requiredDeviceExtension) == 0; });
 				});
 
+		auto features = physicalDevice.template getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan13Features, vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
+		bool supportsRequiredFeatures = features.template get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering &&
+										features.template get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState;
 
+		return supportsVulkan1_3 && supportsGraphics && supportsAllRequiredExtensions && supportsRequiredFeatures;
 	}
 
 	void mainLoop() {

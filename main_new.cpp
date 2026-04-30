@@ -39,6 +39,8 @@ private:
 
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
 
+	vk::raii::Device device = nullptr;
+
 	std::vector<const char*> requiredDeviceExtensions = { 
 		vk::KHRSwapchainExtensionName,
 #ifdef __APPLE__
@@ -61,6 +63,7 @@ private:
 		createInstance();
 		setupDebugMessenger();
 		pickPhysicalDevice();
+		createLogicalDevice();
 	}
 
 	void createInstance() {
@@ -134,6 +137,21 @@ private:
 		}
 		
 		physicalDevice = *devIter;
+	}
+
+	void createLogicalDevice() {
+		std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+		auto graphicsQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties,
+			[](const auto& qfp) {
+				return (qfp.queueFlags & vk::QueueFlagBits::eGraphics) != static_cast<vk::QueueFlags>(0);
+			});
+		auto graphicsIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
+		float queuePriority = 0.5f;
+		vk::DeviceQueueCreateInfo deviceQueueCreateInfo{ .queueFamilyIndex = graphicsIndex, .queueCount = 1, .pQueuePriorities = &queuePriority };
+
+		// Features we queried support for when selecting a physical device.
+		// Currently everyting is false, we will return here to enable some features.
+		vk::PhysicalDeviceFeatures deviceFeatures;
 	}
 
 	std::vector<const char*> getRequiredInstanceExtensions() {
